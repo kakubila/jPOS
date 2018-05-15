@@ -41,6 +41,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import org.jpos.util.LogUtil;
 import org.junit.Test;
 
 public class ISOUtilTest {

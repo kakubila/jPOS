@@ -259,7 +259,7 @@ public class TransactionManager
                         abort   = pt.isAborting();
                         evt     = pt.getLogEvent();
                         prof    = pt.getProfiler();
-                        if (metrics != null)
+                        if (metrics != null && prof != null)
                             metrics.record(getName(pt.getParticipant()) + "-resume", prof.getPartialInMillis());
                         if (prof != null)
                             prof.reenable();
@@ -384,8 +384,11 @@ public class TransactionManager
                     );
                     if (prof != null)
                         evt.addMessage (prof);
-
-                    Logger.log (new FrozenLogEvent(evt));
+                    try {
+                        Logger.log(new FrozenLogEvent(evt));
+                    } catch (Throwable t) {
+                        getLog().error(t);
+                    }
                 }
             }
         }
@@ -436,7 +439,8 @@ public class TransactionManager
                 throw new ConfigurationException("max-active-sessions < max-sessions");
         }
         callSelectorOnAbort = cfg.getBoolean("call-selector-on-abort", true);
-        metrics = new Metrics(new AtomicHistogram(cfg.getLong("metrics-highest-trackable-value", 60000), 2));
+        if (profiler)
+            metrics = new Metrics(new AtomicHistogram(cfg.getLong("metrics-highest-trackable-value", 60000), 2));
     }
     public void addListener (TransactionStatusListener l) {
         synchronized (statusListeners) {
